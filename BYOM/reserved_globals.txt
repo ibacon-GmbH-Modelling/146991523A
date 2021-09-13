@@ -1,0 +1,91 @@
+List of reserved globals in structure "glo"
+===========================================
+The global structure "glo" can be used to pass on information between your script file and functions such as call_deri.m and derivatives.m. However, some fields on this structure should not be used by the user as they already have a definition within BYOM itself (though not in all packages). The following field names for the "glo" structure are used in BYOM, so avoid redefining them for your own purposes (list may not be totally up to date, sorry!):
+
+basenm
+var
+wts
+wts2
+int_coll
+int_scen
+int_type
+scen_plot
+Tinit
+saveplt
+saveplt_str
+saveplt_ftsiz
+saveplt_tight
+saveplt_notitle
+t
+ylab
+xlab
+leglab1
+leglab2
+ylab2
+xlab2
+useode
+eventson
+stiff
+break_time
+h_txt
+str_extra
+LabelTable
+diary
+zvd
+names_sep
+mat_nm
+MF
+
+For the GUTS and GUTS-immobility packages, additionally:
+
+sel
+locC
+locD
+locS
+fastrep
+loc_h
+loc_i
+loc_d
+loc_id
+fastslow
+damconfig
+onehit
+lim_k
+mw_log
+
+For the DEBkiss/DEBtox/DEBkiss_tox packages, additionally: 
+
+delM
+dV
+len
+locC
+locD
+locL
+locR
+locS
+mat
+moa
+feedb
+FBV
+KRV
+kap
+yP
+yAV
+yVA
+yBA
+Tbp
+
+For the dose-response fitting package, additionally:
+
+x_EC
+logsc
+logzero
+
+List of other globals (not part of "glo")
+=============================================
+DATA  (cell array that holds the data for all state variables)
+W     (cell array that holds the weight factors for all state variables)
+DATAx (cell array that holds the extra data sets)
+Wx    (cell array that holds the weights for the extra data sets)
+X0mat (matrix with scenarios and initial values for all states)
+glo2  (structure with additional info on data and parameters; filled in prelim_checks)

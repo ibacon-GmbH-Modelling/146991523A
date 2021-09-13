@@ -1,0 +1,454 @@
+Version log BYOM
+
+Version 1.1 (Date 25/07/2012)
+
+- Adapted transfer.m so that we can also use 1-vector parameter definitions, along with 4-vector definitions, when fitting a model. These parameters will not be fitted and get, by default, a wide range (-inf to +inf).
+- Added the possibility to work with global parameters (not fitted) in a structure "glo". This is handy to pass on information to call_deri or derivatives. This is faster than including a non-fitted parameter in the structure "par".
+- Added the possibility to exclude data from a fit by not specifying these scenarios in the initial value matrix X0mat. See byom_bioconc_fit_extra2.m for an example.
+
+version 1.2 (Date 05/08/2012)
+- Removed the comment in call_deri.m about the need for modifying the code to accommodate survival data (that is not needed).
+
+version 1.3 (Date 29/08/2012)
+- Added an error message when the scenario names are not unique.
+- Error in transfer for survival fitting, repaired.
+- Modified transfer to return a +inf for the min-log-likelihood (i.e., a very poor fit), when the min-log-likelihood is calculated as a NaN or complex numbers.
+- Added a repair for very short time vectors in the data (length 1 or 2), as the ODE solver needs 3 at least (or it will return a huge vector).
+
+version 1.3b (Date 06/09/2012)
+- Corrected an error in start_calc.m which led to wrong fitting when the data set does not contain data for t=0.
+
+version 1.3c (Date 10/09/2012)
+- Corrected an error in transfer.m which only occurred when fitting survival data with fewer treatments in X0mat than in the data set. This produced a "vertcat" error in transfer.
+
+version 1.4 (Date 29/01/2013)
+- Allow for entering the residual variance per data set in a global variable glo.var (vector of same length as number of data sets). It is used in transfer.m instead of treating the residual variation as nuisance parameter.
+- Added the possibility to add more weight to a particular data set using a global variable glo.wts (vector of same length as number of data sets), used in transfer.m.
+- Added the possibility to provide prior distributions for parameters. In the mydata file, a structure pri can be used to provide priors. See file calc_prior.m and the example file byom_bioconc_fit_prior.m.
+- Added the slice sampler for Bayesian analyses.
+- Slight change to the code for plotting the data to enhance readability.
+- Option for population modelling with function calc_pop.m (see the DEBkiss1 package)
+
+version 1.5 (Date 01/05/2014)
+- Added the possibility to use zero variate data (a single data point that has no time vector, but is defined by the model parameters such as hatching time or maximum size).
+- Added the possibility to use an explicit function instead of a set of ODEs.
+- Provided a tricked out deluxe script which makes fitting/plotting straightforward (removed the older ones).
+- Modified call_deri to facilitate modifications by the user.
+- Modified start_calc to make some initial checks on the data set and weight factors.
+- Corrected the slice sampler to also put its output in the logfile results.out.
+
+version 1.6 (Date 29/11/2014)
+- When plotting survival data, the y-axis is now limited between 0 and 1.
+- For fitting with an empty data sets (just a 0), the report now states that this is an empty set.
+- Moved the preliminary checks, calls to the model calculation, and plotting to a separate script in the engine. In general, there will be no need to change these. You can always make you own plotting routine by modifying the file "calc_and_plot.m".
+- Included the option to plot means instead of the individual replicates.
+- In call_deri, specified the position were output mapping can be included. Output mapping is helpful when your data set is in a different form than your state variable (e.g., the state is body weight and the data are in body length).
+- In call_deri, also included an option to calculate the derivative (the CHANGE in the state) rather than the state variable itself. This might be useful for some analyses.
+- Included the possibility to plot confidence intervals on the model curves, after obtaining the sample from the posterior probability (using the sice sampler).
+- Not only a data set with a zero is ignored, but also a data set with only the first row (transformation and scenario names).
+- Small change in calc_conf to allow more than 6 treatments (colors) for the confidence intervals on model curves.
+
+version 1.7 (Date 05/12/2014)
+- Changed the calculation of fixed-tail CIs (quantiles) from the slice sample. Instead of using the sample directly, I now use the kernel-density estimate, which performs better for small samples.
+- Added the option to make an error ellipse for two parameters, using the slice sample. See byom_bioconc_deluxe.m script.
+- Included the possibility to use splined forcing (e.g., a pulsed exposure concentration). See the GUTS2 package for time-varying concentrations.
+- Added files in the engine for the calculation of LCx values (used by the GUTS packages).
+
+version 2.0 (17/12/2014)
+- Added a dedicated simulator that can plot states vs time, states vs states (2d and 3d), derivatives vs states, in 'real time'. See package sim_byom.
+- Loosened the requirements for defining labels in the byom scripts: if labels are not (completely) specified, defaults are used.
+- Modified transfer.m to allow NaNs in survival data sets (times at which no observation was made).
+- Small changes to the GUTS files calc_conf_lc50 and calc_lc50: the location of the survival probability in the state variables is now a global parameter to be set in the byom script (see GUTS packages).
+- Added the possibility to have more than 1 dataset per state. The first data set for state 1 becomes DATA{1,1} and the second DATA{2,1}. This required some larger changes in the plotting routines, so if something unexpected occurs there, contact me.
+- Missing data sets do not automatically generate an error, but are filled with zero in calc_and_plot.m.
+- Added a little handy file in the engine (mat_combine.m) that can be used to combine several data matrices into a single data matrix.
+- Starting the calculations at a time other than zero can lead to unwanted results (fitting started at zero, and plotting from the value specified in vector t). To remedy this, t=0 is always the starting point, unless you provide a value yourself in the global glo.Tinit.
+- The weights matrix for survival data can now be used to specify missing/removed animals, just like in the DEBtoxM flavours. In the weight matrix specify the number of missing/removed animals at the last time point they were seen alive. This also required a change in the plotting routines: the data are plotted as the survival probability, corrected for the missing/removed animals.
+- The preliminary checks on the data set in calc_and_plot and start_calc are not in a separate script: prelim_checks. This makes more sense, also when simulating (start_calc is only called when fitting).
+- Few small changes to prevent/catch errors.
+
+version 2.01 (27/12/2014)
+- Slight changes to the manual to match the changes in the BYOM files.
+
+version 2.02 (02/01/2015)
+- More elaborate manual, which is now placed seperately on the web page (so no longer included in the zip file).
+- Modified calc_ase to calculate confidence intervals unsing the t-distribution if the statistics toolbox is available (otherwise, the normal is used). Use a standard 5% modification of the best parameter estimate to generate asymptotic ase's.
+
+version 2.03 (18/02/2015)
+- An error was produced from the 'stopwatch' when making a prediction (no fitting) with confidence intervals. This is now repaired.
+- Changed the code in make_pp to avoid a warning on newer versions of Matlab (the creation of a piecewise polynomial requires a new function: griddedInterpolant).
+- The file plot_and_calc now contains options (top of the script) to plot in black and white (different symboles for different treatments), and a connecting line between model curve and data point.
+
+version 2.04 (07/03/2015)
+- Corrected an error in mat_combine (the utility combining multiple data sets into a single one).
+- Corrected a glitch in the plotting of conncetion lines (from data point to model line) in calc_and_plot, which plots a point where there are NaNs in the data set.
+
+version 3.0 (03/04/2015)
+- Transfer produced an error when the selected scenarios did not match the scenarios in a specific data set. This is corrected.
+- When the profile likelihood found a better value, this is now not only shown in the file profile_newopt.out, but also in the general logfile results.out.
+- The plotting options (to select black and white and connecting lines) can now be set with a global option. See byom_bioconc_deluxe for an example.
+- Included the option to use simulated annealing or particle-swarm optimisation (using functions downloaded from Matlab Central). A global option is used to select the optimisations (see byom_bioconc_deluxe for an example). This option might work better for bad starting values and many local minima. The swarm optimisation does not require starting values at all, but DOES require the min-max bounds to be as tight as possibly can be assumed. These alternatives are followed up by a Simplex to better estimate the optimum.
+- Included the option to fit selected parameters on log-scale (add a column to the par structure, use 0 for log-scale and 1 for normal scale). See byom_bioconc_deluxe for an example. Not including this 5th column implies all parameters are fitted on normal scale. 
+- Adapted the kernel density estimator (in calc_slice) to limit support for the posterior marginals to the min-max bounds provided in the main script by the user. 
+- Note: all these extra options do not harm the user friendliness; if they are NOT set by the userdefault settings are used.
+- Zero-variate data points are now plotted in a nice way (which can be turned off by an option at the top of calc_and_plot).
+- Change in the layout of the files in the example directory to allow 'publishing' them with Matlab. This is nice to provide a 'walkthrough' through the code, but also to produce a 'modellers log-book'. In time, the engine files and packages will follow. The walkthrough is available on the web site, but also in the package in the html_byom folder as an off-line manual.
+
+version 3.01 (06/04/2015)
+- In new versions of Matlab, the plotting handles are no longer simple numbers. This produced an error when plotting in black-and-white with connecting lines, trying to move the latter to the background. I think I solved it in a way that works in both older and newer versions of Matlab (but let me know if you hit an error here).
+
+version 3.02 (30/06/2015)
+- Corrected an error: when the scenarios modelled do not include all of the cases in the data, the wrong weight factors from the W{i} input were used in some cases.
+- Included an option (third value for glo.plt) to limit the plotting axes to the data set. This is particularly useful if you have more than one state with data, and their time axes are different.
+- Corrected a few errors that led to problems when using glo.Tinit (to not start time at zero), when the data still includes observations below Tinit.
+- Included an option in transfer to use a single residual error variance (as nuisance parameter) per state if you have multiple data sets. This needs some further testing, so by default it is turned off.
+- Repaired an error in calc_plot, which produced an error when plotting in black and white with connecting lines with different lengths of data sets. And another error when plotting with limited axes while some sets have no data.
+- Mat_combine cannot work when the time vector for a data set (first column) contains duplicate time points. Previously, it only used the first value only, but this now produces a clear error message.
+- Included the possibility to add extra data sets for which time is NOT the independent variable. For example, one could have growth and reproduction over time as the primary data sets, and respiration versus length as a secondary one. This option is NOT yet explained in the manual, but at some point packages will appear that demonstrate this option.
+
+version 3.1 (21/08/2015)
+- Corrected transfer.m and plotting in calc_and_plot.m for use with extra data sets with multiple scenarios.
+- Repaired a problem that caused an error with the legends when plotting in black and white, when scenarios are modelled that have no data.
+- Corrected an error in profile likelihoods, slice sampler that led to errors when parameters were fitted on log scale. Also changed that if a new optimum is found for a log-scale parameter, the new value is reported on normal scale. Also corrected an error that would produce wrong prediction interval when a parameter is set to log scale, but not fitted.
+- Allowed for an optional extra argument to the call of calc_proflik to select for a detailed (1) or course (2) analysis (course is the default).
+- Added a file (calc_likregion) that allows to take a sample from the joint likelihood-based confidence region, for forward predictions with uncertainty bounds. This function works in a comparable way to calc_slice, and also produces a MAT file (with filenname_LR.mat). The files calc_ellipse and calc_conf have been modified to take both this new approach and the Bayesian MCMC approach that was already implemented. In conjunction, calc_slice has been amended to also produce a joint highest-posterior density 95% credible region, which is shown in the ellipse plot (and can also be used to generate forward predictions). This requires more testing, and at some point, a package will follow to demonstrate these new possibilities. 
+- Corrected the timer, which was reset sometimes when performing multiple analyses post fitting.
+
+version 3.2 (25/08/2015)
+- Repaired the calculation of the intrinsic rate of population increase (calc_pop.m), which stopped working some revisions ago. Further, there was an error in the code as the survival probability was not included in the calculation. The script is demonstrated in the new version of the DEBtox1 package.
+- Repaired an error in the profile likelihood when a better value is found and some parameters are fitted on log scale (reporting on screen and to file was always either on log scale or on normal scale for all parameters).
+
+version 3.3 (27/08/2015)
+- Corrected an error that prevented the calculation of confidence intervals on LCx values when at least one of the fitted parameters was on log-scale.
+- Small change to script file, ensuring that the slice sampler always knows the filename of the script, even if it is called by running only part of the script (which messes up the 'mfilename').
+- Corrected a few errors in the plotting routine for optional extra data (when there are multiple data columns for one scenario). The use of extra data sets is demonstrated in the new version of the DEBkiss1 package.
+
+version 3.4 (07/04/2016)
+- Working with different studies, where one contains a survival data set, yielded an error in the preliminary checks. This is now solved.
+- Included the option to save all produced graphs to the current directory in either FIG or JPEG format. See how glo.saveplt is used in file byom_bioconc_extra.m (not yet included in the HTML walkthrough).
+- For the extra data sets, connecting lines between model and data point are also plotted.
+- Calculating a profile without fitting led to an error when parameters are specified by 4 values instead of 5. This is now fixed (normal scale is default).
+
+version 3.5 (05/01/2017)
+- Modified transfer.m for the goodness-of-fit calculation of survival data. This requries the statistics toolbox, so if this toolbox is not in the path, it returns a NaN (instead of an error).
+- Using prior distributions (other than uniform or triangular) required the statistics toolbox. Same for using zero-variate data. I included a direct calculation for the lognormal and normal; only for the beta distribution, the statistics toolbox will be needed.
+- Modified calc_slice.m: it already calculates the log-likelihood for each entry in the sample, so it is an obvious improvement to check if a better optimum has been located (and, if so, report it on screen).
+- As option in calc_conf, the possibility to include the sampling error into the confidence bounds on survival data.
+- As option in calc_conf, the possibility to plot the senstitivies of the model parameters to the output. This uses the sample from parameter space (including the correlations between parameters). The sensitivity coefficient is the correlation coefficient between the parameter and the model output at each time point. This should be interpreted as a measure of the contribution of the parameter to the overall uncertainty in the output. 
+- Corrected an error message from calc_conf when trying to load a MAT file that is not available.
+- Included a new function calc_localsens to perform a local sensitivity analysis on the model. It departs from the fitted parameters, and calculates the relative change in state variables due to a small percentage change in a model parameter (one-by-one).
+- Modified the slice sampler to make a nice overview plot of the results (similar to the Bayesian plot used in Albert et al 2016). The marginal densities are shown on the main diagonal, and the other plots represent the sample in 2-D, for all parameter combinations. The individual prob. density plots can still be made; there is a switch in calc_slice for that. The ellipse function (calc_ellipse) has become superfluous, but is still available in the engine.
+- Also modified the likelihood-region method to provide a similar plot as for the Bayesian slice sampler. However, note that it is the profiles that are shown on the main diagonal, and the other plots represent the *accepted* samples (that are within the 95% CI of the parameters). The old plots can still be made; there is a switch in calc_likregion.
+- Repaired an error that prohibited plotting of data when using multiple sets per state, but not every available scenario was called in X0mat.
+- Small change in transfer.m for continuous data: don't count points with weight zero in the number of data points. This leads to slightly different likelihood values in case the data are means from a group of animals (and when there are observations with weight zero). 
+- Show the (uncorrected) Akaike Information Criterion in the results on screen, behind the minus log-likelihood.
+
+version 4.0 Beta 1 (15/02/2017)
+- Most important change is that most calculation routines (files in engine directory with a name of the form calc_xxx.m) now have option structures. These option structures are filled with defaults in prelim_checks.m but can be overwritten in the script file by the user. See byom_bioconc_extra.m for more information. In this way, the calls to the functions and the scripts are simplified, and there are no more optional switches to be set in the calc_xxx.m functions themselves. This makes it also easier for me to add more options in the future. However, older script files useing these functions may produce an error (which can be repaired by changing the call to the function as in the examples). All packages will be modified as well. This is a major change, so there may be some hickups. If you get a strange error message, let me know!
+- Another important change is in the plotting. All routines that plot figures have been modified to produce similar graphs, with similar font sizes. If the figure windows are mde in NON-docked form, the windows are given a default size that matches the number of sub-plots. This is done in a new function make_fig.m in the engine directory. You may need to adapt this function if on your monitor the figure sizes or their positions are odd. Again: this is a major change, so errors or odd behaviour may occur for some settings!
+- Plots can now be saved as PDF as well, with a few extra options. See the text file all_options.txt.
+- Corrected an error: when plotting in black and white, confidence intervals on model curves where shown in color.
+- Corrected small glitch that legends were not properly plotted when making predictions (without data) in black and white. Now, no legend is shown at all (better use colours for that).
+- Small change in transfer.m for continuous data. In the previous update, I modified the likelihood calculation to not count points with weight zero in the number of data points. However, I forgot to do that for any 'extra' data sets as well (see last comment on version 3.02). Note that the use of extra data sets is applied in the DEBkiss1 package for the embryo calculation.
+- All options are also collected in a text file: all_options.txt.
+- Made a change in the use of time-varying exposure concentrations (which were splined by make_pp.m and used in derivatives.m). Instead of introducing two new globals (pp_coll and pp_scen), these globals are now made part of the overal global "glo" (as glo.pp_coll and glo.pp_scen). Advantage is that you now don't have to declare a new global in dervatives.m. So far, this was only used in the GUTS2 package, which will also be updated.
+- Included an option for calc_likregion to bound the axes for plotting the sample either to the bounds of the hyperbox from the the total LHS sample was taken (as done in the previous versions), or on the basis of the accepted sample (usually a tighter fit to the figure window).
+- Profiling the likelihood function is not always too robust; with rough surfaces, the optimisation easily misses better values elsewhere in parameter space. As the algorithm proceeds every time from the previous best fit, it follows a specific trail through parameter space, where there might be a lower value on a different path. In an attempt to make the profiling more robust, without making big changes, I copied the search routine fminsearch from Matlab to the engine, and renamed it fminsearch_wide. One of the options is now the size of the initial simplex. By casting the initial simplex very wide, the routine has a better chance to spot better optima. This is now used in calc_proflik and calc_likregion using the option 'delta' (now set to 0.5 where the standard in fminsearch was 0.05).
+- In addition to the previous change, I added the option for random sub-optimisations in calc_proflik and calc_likregion. Instead of departing at every new point from the previous best only, additional initial optimisations are performed with randomly perturbed starting values (randomly sampled from minus 33% to plus 300% of the best value). This increases the robustness of the profiles with rough surfaces of the likelihood function (sometimes shown as jumps in the likelihood profile), at the expensive of longer calculation time. The option is included in the example script byom_bioconc_extra. However, in the future, more work is needed to investigate the robustness of profiling for rough surfaces.
+- When the user does not have the statistic toolbox, cal_likregion canot use Latin-hypercube sampling. Instead of an error, the calculation is now performed with a standard uniform sampling. Note: this likely needs more samples to get a good coverage of the confidence region. Along the same lines: when there is no statistics toolbox, the chi-square criterion is read from a table instead of invoking chi2inv. This works as long as 20 or less parameters are fitted.
+- Small change to calc_conf_lc50 to allow to NOT calculate/plot CIs, even though there is a sample available.
+- Numerous small changes to reduce the number of 'problems' spotted by the Matlab editor (indicated by the editor in the side bar).
+- Small change in how leglab2 (text in legend after the scenario number) operates. A space is now added when legends are plotted, so no need to put a space in leglab2 itself. This is handy as leglab2 is also used in plotting LC50 versus time, for the y-axis label, and then the space is a bit ugly.
+- Changed calc_and_plot to make sure that symbols are always on top of any lines that may also be plotted.
+- When, in a continuous data set (not survival), there are observations with zero weight, I assume they are considered an outlier. When plotting in black and white, these points are now plotted as black symbols (which does not work so well when you plot in black-and-white and have more than 8 scenarios to plot!). When plotting in colour, a circle is drawn around the outliers. This behaviour is governed by an option (opt_plot.outl), and by default it is set to on.
+- Extended calc_conf_LC50.m to calculate exposure-multiplication factors: this is the factor by which the exposure scenario needs to be multiplied to get x% mortality at a certain time point. This factor was proposed by Ashauer et al (2013) for risk assessment of fluctuating exposure concentrations. Therefore, it only works when you have a splined exposure profile in your script!
+- Included as option an experimental optimisation procedure, which starts not only at the starting value you provide, but also at a number of other points (randomly perturbed from the starting values). For now, you need to tweak the settings of this routine in start_calc Line 88 and further.
+- If you skip the profiling step in calc_likregion.m, and there is a saved set from a previous analysis, you will see the profile as was made in that previous analysis (if you are making sub-plots!).
+- Extended the slice sampler to provide more detailed analysis of the representativeness of the sample. Additional plots with a moving average of the trace, and analysis of autocorrelation in the sample.
+- Changed the call of calc_likregion to make it more comparable to calc_slice: the number of samples is now not the total number of samples tried, but the minimum number of samples accepted before the sampling terminates. Every iteration, a burst of x samples are tried (set with the option opt_likreg.burst) is tried. Set x to a value that matches the number of parameters and the expected correlations. On screen, progress is shown, which allows the user to get an idea of how long to wait.
+- If not putting the fits into subplots, saving the figures automatically (with glo.save_plot) went wrong (only last plot was saved). This is now corrected.
+- Changed the call of the function calc_ellipse. It no longers requires the parameter vector par_out, as it uses a saved set (and thus also the parameter matrix as saved).
+- The prior distributions were not plotted correctly by calc_slice, especially when a parameter is used on log-scale. This is now corrected.
+- Re-using saved sets (number of samples -1, which loads in a MAT file) from calc_slice and calc_likregion could lead to strange results if the parameter matrix has been changed since running the first set. For example, if a parameter is changed from normal scale to log-scale, or a new optimum is found, in between saving the set and re-using it. Now, re-using the saved set will always apply the settings (best fit, log-scale, bounds, fitted parameters) of the saved set. If the parameter matrix in the saved set is different from the one now active in the memory (par_out), a warning is displayed on screen.
+- As some files in the engine are actually scripts (calc_and_plot,calc_conf,calc_conf_LC50) they can change parameters in the workspace. This could lead to unexpected results. I now modified them such that par is always the parameter matrix as defined in the base script, and par_out is always the version after fitting.
+- In conjunction with the previous two changes, a number of small changes are made to ensure consistent behaviour when parts of the script are run in various orders, with and without fitting. Explanations and warnings are shown on screen that should help to interpret what has happened.
+- Introduced a small new function all_profiles to make profiles for all fitted parameters. This replaces some (potentially confusing) code in the basic scripts.
+- If setting fit=0, the minus log-likelihood is calculated anyway, and provided on screen with the parameter values used. This makes simulation a bit slower than previously! However, there is an option to turn this calculation off, and speed up the simulations as much as possible (see opt_plot in all_options.txt).
+
+version 4.0 Beta 2 (02/03/2017)
+
+- Another MAJOR change: several scripts were called from the main script (e.g., calc_and_plot and calc_conf). These have now been turned into functions (apart from prelim_checks). This is really good to make sure there is no unwanted interaction between the various pieces of code (especially when they are called in different order than I originally anticipated). However, this means that the calls of these files have also changed, and that several things have to be defined as globals (e.g., the axis labels). 
+- Linked to the previous change, the fitting has now been removed from calc_and_plot. The calc_and_plot now only calculates the model curves and plots them. You can call calc_and_plot with your initial parameter set (par) to simulate. For fitting, you now need to call the function calc_optim (with its own set of options), which delivers a fitted set of parameters (in par_out), which you can send to calc_and_plot. The example files demonstrate this. The option 'fit=0/1' thus no longer exists. This change is perhaps perhaps confusing to users of the versions before 4.0, but it is more logical from a coding and calculation-flow perspective.
+- In the example scripts, replaced "clear all" by "clear, clear global". This avoids the warning messages produced about files that could not be cleared, and apparently increases performance.
+- Additional 'annotation' option to plot a legend in an extra subplot of a multiplot. This legend contains all entries in X0mat.
+- Option to suppress plotting certain states in a multiplot.
+- The calculation of sampling error for survival data was extended. If scenarios are modelled for which no data are present, the number of individuals is taken as the mean from the treatments where there are data. Further, if there are replicated treatments (more occurences of the same concentration in a data set), the number of individuals for the calculation of the sampling error depends on whether replicates are plotted or means. 
+- Small change in make_pp: the function now checks whether you asked to make multiple splines for the same scenarion (there can be only one spline per scenario, otherwise it is unclear which one is used).
+- Small change in pathdefine: if the function cannot find the BYOM folder, it returns to the original departure point, rather than putting Matlab in the root directory.
+- Moved a piece of code to generate long time vectors for GUTS calculations from prelim_checks to the call_deri for the GUTS packages. This is a more logical place, and it ensures that Xout only contains the outputs at times that you asked for, and not more.
+- Small change to the way the sampling error is included for survival analysis, when using the likelihood region method. Instead of taking percentiles on the subsamples for each parameter set, and min-max afterwards, I now use the same approach as for the slice sampler: collect the results for all sub-samples and all samples, and then take percentiles. This is probably more realistic (especially for small sub-samples, the intervals were very large), and in this way, the bounds for the two methods are more in line. However, this needs further study.
+- Modified call_deri so that the options in there are now part of the global structure glo. This means they can be set from the main script, and there is no need to modify call_deri for these things anymore.
+- Added a function print_par that prints the parameter structure in a formatted way. The profiling now prints this formatted version on screen and in file. If a better optimum is found, it can be copy-pasted directly into your script, instead of the previous starting values.
+- The profile likelihood now has an option to break the analysis when a better optimum is located (it stops when a better value is found AND the next value would be worse again, so it follows the path to better values until it stops). The new optimum is an optional output of the function.
+- An automated version of my standard analysis method is now implemented in auto_profiles.m: make profiles for all parameters, but stop immediately when a better optimum is located, run a new optimisation from the new optimum, run profuiles again (starting from one produceing the new optimum); repeat until no new optimum is found. This is only advisable to run automated if you REALLY know what you are doing!
+- Corrected small error in sim_and_plot that produced an error when making legends for plottype 4. Plus another one for selecting colors for plottype 2.
+- Added a function plot_guts to plot survival data in more detail in multiplots: time-response plots (each treatment in a subplot), deaths-per-interval plots (each treatment in a subplot), and concentration-response plots (each time point in a subplot). 
+- The function fminsearch_wide was removed again; it worked well in some cases but poorly in others.
+
+NOTE: To convert scripts from the previous BYOM version to the 4.0 Beta ones, it is by far simplest to take a new BYOM script file (e.g., one of the examples) and implement your data and other modifications in there. 
+
+version 4.0 Beta 3 (06/04/2017)
+
+- Small change in behaviour of opt_optim.it: when set to zero, it now suppresses all output of fminsearch (earlier, it still showed when there was no convergence in the first run). The output on screen in the little BYOM report has the information on number of iterations and convergence.
+- Modified the auto_profiles function to repair potential problems with plotting the profiles when a new optimum is located, and included an option to compare zero and ten sub-optimisations in profiling (opt_prof=-1; this option is only used in auto_profiles.m).
+- Small change in calc_and_plot to limit x-axis to slightly more than what is needed to capture both data or model. The default Matlab setting leads to a large empty part of the x-axis in some cases.
+- Corrected small glitch in calc_slice that yielded an error when glo.saveplt=1. Another glitch with the saving plots corrected in calc_slice if making a multiplot.
+- Corrected an error in calc_and_plot when scaling the x-axis for plots that don't have data.
+- Corrected an error when using opt_slice.alllog and one of the parameter values is zero.
+- No need to specify the plotting vector glo.t anymore in your script. If you don't, you will automatically get a time vector that is based on the maximum time point in your data set. You can always define your own glo.t if you like in the script, which will override the default.
+- Corrected in error in plot_guts that led to incorrect plotting of dose-response curves (and incorrect titles in the time-response plots) when the concentrations in the data matrix were not in ascending order. Also, removed the dose-response curve for t=0 (which is trivial anyway).
+- Repaired an error in calc_conf, with the tag_fitted that was added in the parameter vector, and became part of the temporary names vector used there.
+- The calc_likregion now imediately saves the information from the profiling when it finishes profiling. Earlier, it only saved after the sample was taken, so now it is possible to kill the sampling and keep the profile information. Also, 95% CIs of the individual parameters are displayed on screen when re-using a saved data set.
+- Calculation of LC50s with CI gave an error due to the extra 'tag_fitted' in the saved parameter structure. This is now repaired.
+- Using a splined exposure concentration could lead to strange results when extrapolating beyond the time course of the splined set (it was extrapolated using pchip). Now, for extrapolation with new versions (using griddedInterpolant), the nearest value (i.e., the last time point) is used. For older Matlab versions (before 2011b), I am not sure how to implement this, so make sure you don't extrapolate beyond the splined data.
+- The function plot_guts did not save figures when glo.saveplot was on, so that is fixed now.
+- call_deri adapted: the option glo.stiff now has three options for the ODE-solver. 0) ode45 (default), 1) ode113 (moderately stiff), 2) ode15s (stiff solver). If the solver gets stuck, you can experiment using a different solver (or modify the tolerances in the options for the solver in call_deri).
+- With the new version of Matlab, the legends are updated when new data is plotted. I turned this option off in calc_and_plot and sim_and_plot, which should be sufficient. If you get nasty legends with additional data1, data2, etc. entries, let me know. Also, the change I made to suppress this updating will lead to errors with old versions of Matlab. Feel free to modify the calls to 'legend' to remove the autoupdate setting.
+
+version 4.0 (27/04/2017)
+
+- Small changes to transfer and calc_and_plot to support the new package for fitting a standard dose-response curve. Adapations were needed to support use of the binomial distribution (when concentration is on the x-axis) and to plot results on a log-scale.
+- Corrected an error for the plotting of extra data sets.
+- Small changes to calc_pop to make the two plots in one figure as subplots, and to use the legend labels in the global glo for the x-axis.
+
+version 4.01 (12/05/2017)
+
+- Added option to add information to the results plotted in graphs when opt_plot.annot=1. This option will be used in a future update of the dosresp package, to write the ECx estimates with their CIs into the plot.
+- When using the likelihood-region method to make confidence intervals for the LC50, percentiles were taken. This should have been min-max. The intervals thus had less coverage than 95%, and this is now corrected.
+
+version 4.1 (01/02/2018)
+
+- Small change in calc_slice: the intervals were not reported properly when the sample was really close to the maximum value of the parameter (extremely skewed posteriors). This is now corrected.
+- Small changes to auto-profiles to allow comparison of three numbers of sub-optimisations, where you can choose the numbers yourself. This is not yet properly documented in the code, and there is no option for it yet. However, you can experiment with it by playing with the setting of subopt_set in the function auto_profiles.
+- In calc_conf, using the sampling error could produce an error when one of the death probabilities is slightly negative. This is now corrected.
+- When working with extra data sets per state variable, an error can be produced when weights are not specified for each data set. This is now corrected in prelim_checks. Also, an error was produced when excluding scenarios from X0mat that are in the data set. This is now corrected in calc_and_plot.
+- Added the possibility to use non-constant exposure in a general manner with the function make_te. This is demonstrated in the 2.1 update of the GUTS package (directory 'experimental').
+- Small change in calc_localsens to make it respond to the option to suppress the title (apparently, I forget to implement it there). Similarly, in calc_conf made sure that the handle for the title text is made global so that it can be used to remove the title later (especially when saving the plot).
+- Changed the provisional goodness-of-fit measure. This is now the r-square for all data (earlier, it was r-square for continuous data, and the chi-square probability from the deviance for survival). For survival data, a warning is shown that this is not a very appropriate measure for goodness-of-fit, although it does give an indication for the correspondence between predicted and observed survival probabilities.
+- The option opt_plot.notitle did not work. Changed calc_and_plot to make sure the titles are not placed omn the plots when this option is set to 1.
+- When weights were applied per data set with glo.wts, and multiple data sets per state are entered, the optimisation report on screen showed incorrect weights. This is corrected.
+- Small change in calc_proflik. In some cases when a better optimum was found, the new best likelihood was shown on screen as -1 (it was correctly shown in the the profiles_newopt.out log file). This is corrected.
+- Modified the calculation of LC50s and multiplication factors to work with the make_te version of an exposure profile (defining multiple episodes with constant concetration within an episode). Changes are made in the general BYOM engine, but only affect the GUTS calculations.
+
+version 4.2 (07/08/2018)
+
+- MOST IMPORTANT CHANGE: modified calc_likregion to generate the correct sample to use for forward predictions. Previously, I propagated parameter sets from the entire 95% confidence region. However, that leads to very conservative CIs on model predictions (becoming more and more conservative with more fitted parameters). I now found out that propagating the inner region (cut off at chi2 df=1) leads to the correct CI on model predictions (this will be explained in detail in the context of the upcoming dedicated GUTS software). This implies that previous _LR.mat files should not be used anymore.
+- The profiled points are now also included into the sample that calc_likregion creates. They are valid points, and they help to increase representativeness of the sample (especially in parts of parameter space were sampling is tough).
+- Repaired a small error in the profiling in calc_likregion (which did not occur in calc_proflik). This produced an error when attempting to interpolate to the crossing of the chi-square criterion, when the next higher value is INF.
+- Range of tiny changes throughout in texts and warnings. Small code changes that do not influence calculations but remove warnings from the Matlab editor (and hopefully provide a tiny advantage for calculation speed).
+- Modified the implementation of time-varying exposure concentrations (so far only used in the GUTS package). Integrated make_te and make_pp together with a new static-renewal option (with first-order disappearance between renewals) into a new function make_scen. This function is also called in derivatatives and simplefun to calculate the exposure concentration when needed, which makes these two functions more compact and readable (at the expense of a more complex make_scen in the engine). There is also an option to call make_scen to remove all or selected scenarios from the globals.
+- The changes in the previous point also required changes in calc_conf_lc50 and calc_lc50.
+- Calc_lc50 is removed as separate function. Since it is only used in calc_conf_lc50, it is now made a sub-function in there. 
+- Added a legend and title to the plots for the sample in calc_slice and calc_likregion. These plots now also show an inner rim in the sample: for calc_slice this is the 95% highest posterior density region, and for calc_likregion this is the sample that will be propagated for forward predictions (slightly more than the chi2 criterion for df=1).
+- Repaired several errors that occurred when working/plotting with extra data sets and outliers.
+- Corrected a small error in the plotting function for make_scen.
+- Modified how transfer checks whether a tried parameter is within the min-max bounds. Previously, a value exactly on the boundary was judge as outside. Reason is the limited precision when taking the logarithm and going back again.
+- Modified all functions that profile the likelihood. The crossings of the chi2 criterion are now calculated in a smart way in a separate function calc_xing.m. This shortens the code and increases transparency.
+- There are two functions at this moment that create samples from parameter space for CIs on model curves and predictions: calc_slice and calc_likreg. Samples are saved in mat files. Several other functions load these mat files (for now only calc_conf and calc_conf_lc50). The logistics of this process is now modified: calc_slice and calc_likreg only save the full sample, and loading is controlled by a new function (load_rnd) that also calculated the correct (sub-)sample to use. The option to use a limited sample is therefore moved to opt_conf. This has the advantage that you can now use a different limited set for the likelihood-based method (or a different addition to the chi2 criterion: crit_add) without having to generate a new full sample. Furthermore, it simplifies the code a bit, as loading and manipulating the sample occurred in several functions. Several options are moved, and the call to calc_conf_lc50 is changed (added options opt_conf) so check your code! It is a good indea NOT to use previous _LR.mat or _MC.mat files anymore.
+- In relation to the previous point: I removed the option to calculate CIs using the joint 95% highest-density region for the Bayesian sample, as it makes little sense. I added a new limited set for the likelihood-region method: using the outer hull of the region that is to be propagated (all sets within the chi2 criterion plus/minus 0.4, implemented in load_rnd.m). 
+- Removed the small function all_profiles as this functionality (profiling all fitted parameters) is better served by auto_profiles (which also restarts automatically when a better optimum is found).
+
+version 4.2b (13/08/2018)
+
+- Added an option for calc_likregion to search a smaller part of parameter space. By default, it tries to capture the 95% joint conf. region of the parameters. However, only the inner rim (chi-square criterion for df=1) is needed for propagation of uncertainty to model predictions. Setting opt_likreg.lim_out = 1 will limit the search area to something a little more than the edges of the inner rim. This helps in cases where calc_likregion is very slow.
+- Added a new scenario type for the time-varying exposure scenarios in make_scen: linear interpolation with a forcing series, which can be used in conjunction with an analytical solution for scaled damage (as used in GUTS). This makes it much faster (and generally more accurate) than the use of ODE solvers for time-varying exposure. This will be demonstrated in the next update of the GUTS package.
+- For the time-varying exposure scenarios: found an error when defining more than one type in a single analysis (all types were set to the last call to make_scen). This is now corrected.
+- The calculation of the LCx and LPx contained a bias in case background hazard is high and the exposure period is very long. This mainly affected calculations on long time scales (such as LPx in FOCUS profiles). The reason lies in the calculation: I first calculate survival in the control, and use that to correct the survival in a treatment. This was a good idea in terms of generality (there is no need for the function calc_conf_lc50 to know which parameter(s) deals with background mortality). However, dividing one very small number by another apparently leads to bias. This is now corrected, at the expense of requiring a parameter name to be provided that to governs background mortality. This is done in the option structure opt_lc50.backhaz, which is by default set to 'hb' (as used in the GUTS package).
+- Prelim_checks.m now also checks that the initial survival probability for GUTS analyses is one. The LCx/LPx calculation in calc_conf_lc50 also checks whether the initial concentration and initial damage are zero. The are allowed to be non-zero, but a warning will be given (and the initial concentration from the first column of X0mat will be used).
+
+version 4.2c (07/09/2018)
+
+- Small change to calc_likregion plotting: when a limited sample was used instead of the complete 95% joint conf. region, this is now correctly shown in the legend of the parameter-space plot.
+- Under the hood: when making CIs from a saved set, a comparison is made between the parameter structure in the workspace (used to call a function like calc_conf) and the one in the saved set. This is now a separate general function (par_comp), which is called by several functions.
+- Found an error in calc_conf with the new set_zero option. This option is used to plot survival over time at the LPx in the GUTS package. It went wrong when background hazard was fitted on log scale (or the alllog option for the slice sampler was used). In that case, the upper and lower CI curves would be close together and show very high mortality. 
+- Some under-the-hood changes in make_scen, calc_conf and calc_conf_lc50 to make the code more transparent and/or efficient.
+
+version 4.3 (23/04/2019)
+
+- Placed a license note in all files, and a LICENSE.txt file in the root directory. This should make it very clear that you are free to use these files for many different purposes, but that the software is provided "as is".
+- Modified calc_slice so that the Bayesian results now show the median of the marginal distributions as well (for those who prefer that above the best-fit parameter estimates).
+- Added a new option for profiling (both in calc_proflik and calc_likregion) to set the range that the sub-optimisation cover (at each step in the profiling, to restart the simplex with randomly perturbed starting values to help spot other optima). Previously, this factor was fixed to 3, but now it is an option with a default of 5 (the dieldrin case study in the e-book demonstrated that an even larger value may be needed for some cases!).
+- Added an option to auto-profiles: a -2 will now make a comparison between no sub-optimisations and sub-optimisation with simulated annealing (followed by a single simplex). Since simulated annealing looks a bit wider than a simplex does it might be better at spotting alternative local optima. (however, that is likely case dependent)
+- Small change in transfer: added calculation of r-square for fitting survival dose-response curves. And make sure that calc_optim displays a warning that r-square is not appropriate.
+- Repaired a small error in calc_slice that produced an error when glo.saveplt_notitle was not defined.
+- In calc_and_plot, the legend statements were amended with a setting to prevent the legends from updating automatically. This was needed for newer versions of Matlab. However, this statement yielded errors when using older versions. I now set a general default behaviour in prelim_checks and sim_and_plot, which should solve that issue.
+
+version 4.4 (02/09/2019)
+
+- Modified calc_conf for sensitivity analyses (contribution to uncertainty): when there is no meaningful difference in a state variable across the elements of the sample, the correlation coefficient is set to zero. This avoids seeing 'correlations' that are caused by the limited precision of the ODE solver.
+- Modified the derivation of limited sets for making confidence intervals on model predictions. Option 2 remains the same (outer hull for frequentist sampling), but option 1 is slightly changed. Previously, for frequentist, it took the n_lim worst sets that were still within the outer hull. Now it takes a random sub-sample from the outer hull. This option is now also available for Bayesian analyses where it takes a random sub-sample from the complete posterior (as there is no relevant 'outer hull').
+- Prepared the code for another optimalisation/likelihood region method: the parameter-space explorer as used in the openGUTS software. This option is not yet available in this version of the package. However, at several points in the code, you can see that reference is made to this method.
+- Started with a move towards a general definition for the plots in one place (make_fig). Thereby, you can change the layout of all plots in one place, and font size is automatically decreased on small screens (e.g., netbooks).
+- Updated calc_pop for calculating intrinsic rate of population increase. It now also works with an option structure and allows for confidence intervals. However, this function still needs some more thorough testing. Since the call of the function has changed, this does not work anymore with older script files. It does work with version 3.1 of the DEBtox2019 package. Other packages will be updated in due time to work with the new function.
+
+version 4.5 BETA, not released through the web page! (19/11/2019)
+
+- Implemented the parameter-space explorer of openGUTS. This routine does robust optimisation, confidence intervals on parameters, and derivation of a parameter cloud for error propagation, in one go. This comes with a sub-folder in the engine folder, and a number of small changes in calc_optim and the functions creating CIs. It also comes with starting-range estimation for GUTS and DEBtox.
+- Small change in make_scen: when using option 4, and the same time point is used twice, the slope is NaN which can lead to trouble. These NaNs are now simply removed.
+- Extended the warning message displayed on-screen for the use of calc_ase. This method can, in some cases, lead to complete nonsense. I will keep it in BYOM, as it is good to compare various methods from time to time. However, for accurate CIs, you MUST use likelihood profiling (or Bayesian methods).
+- Small change to prelim_checks for cases when no data are entered (so predictions only). For that case, glo.t must be defined. If not, an error is produced. If it is defined, it is also used for glo2.ttot to prevent errors.
+- Small changes to output formatting to screen: trailing significant zeros when useful, and fixed point notation for likelihood and AIC (since they are log-scale, and absolute differences are relevant).
+
+version 4.5 BETA 2 not released through the web page! (27/01/2020)
+
+- Included an option to define legend labels for scenarios, rather then generate them automatically from the scenario identifiers. This will now be used for the diazinon case study in the next update of the GUTS package.
+- Replaced geomean in the startgrid functions with mean, as geomean is in the statistics toolbox (and a geometric mean is a bit nonsense anyway, as it was just used to provide a value in the first column of the parameter matrix, which is not used anyway).
+- Modified calc_and_plot. When plotting multiple data sets per state, and a single legend, the legend would show all scenarios that were run (so also ones not relevant for the current plot). Changed to have a legend that only shows lines that are actually plotted. This is rather tricky with the possibility for the user to suppress scenarios without data or suppress states for plotting. Therefore, this may still lead to unexpected results!
+- Small change to packunpack, which makes it easier to use for reconstructing food history (the options 3 and 4 in this function, which will generally be called upon before prelim_checks has had the possibility to define glo2.names).
+- Replaced the progress bar in the display window by the standard Matlab wait bar for several functions (more updates will follow).
+- Created a new function plot_tktd to make standard plots for TKTD analysis (GUTS, DEBtox, but also for mixtures). The plots are formatted like the ones in openGUTS, but the exposure scenario and damage are shown in the same plots. If multiple data sets are defined per state, each set gets a new figure window. This function replaces plot_guts, although that one is kept in the engine for now as it includes some functionality that may be useful.
+- Added two new functions in the engine/parspace for mixture predictions. These functions combine two parameter clouds from individual chemicals into a prediction for the mixture. This will be demonstrated in a package at some point in the future.
+
+version 5.0 (29/05/2020)
+
+NOTE: there are MANY changes in this version (also see the beta versions above that were not released through the web site). Therefore, there WILL be errors and bugs in the code, which may force me to release a version 5.1 soon. If you run into bugs, please contact me. Also note that your old scripts may produce errors with the new BYOM engine (I mainly expect that when calculating ECx or EPx values). I will update the affected packages ASAP, and then you can look at the code in those to adapt your code where needed.
+
+- Note: see also the changes made in the non-released sub-versions listed above.
+- Modified plot_tktd to make sure that mean and CI for length/repro account for any transformations of the data and model. Furthermore, allowed for missing/removed animals in the survival data. Added a weighted SE for sub-lethal data, when weight factors are used. Also modified the axes limits when using multiple data sets: the limits are now set on the data for the data set plotted, rather than all data together.
+- Added a function load_data_openguts that will read the formatted text files for input data from openGUTS, and translates them into the BYOM format. For time-varying exposures, the names of the treatments are placed into the LabelTable, so they end up in the plots. The functions also works for multiple input files.
+- Plotting data requires some manipulations. When plotting means, we need to combine replicates, and take care of any transformations and differences in weight factors. For survival, a translation to probabilities and taking care with NaNs and missing/removed animals is needed. This was done differently in plot_tktd and calc_and_plot. These manipulations are now dealt with in a separate function recalc_data, which is called in both plotting routines. Calc_and_plot now has an option to transform the plotted means and accommodate weights (both of which it did not do before). To make both plotting functions more alike, the option opt_tktd.means was renamed to opt_tktd.repls, and now works in the opposite direction. Both plotting functions now plot outliers on single replicates and on means (when all replicates are outliers), for sub-lethal endpoints only (when weight factor is zero).
+- Added an option in calc_and_plot to plot replicated data as boxplots. Also added an option to force the y-axis of plots to go to zero (which is now on by default).
+- Small efficiency changes in transfer: remove NaN elements from vectors rather than indexing the non-NaNs, and improving the r-square calculation so that it works for survival data with NaNs and missing animals.
+- Small changes in call_deri, derivates and simplefun to increase speed. Moved structure glo from being global to an input in derivatives and simplefun. Especially for derivatives, this gives a dramatic increase in calculation speed. In call_deri, only set ODE options when using the ODE solver. This increases speed when using simplefun. Also: set all options in one call to odeset, rather than several. This changes can be made for all packages, but this may take me some time.
+- In conjunction with the previous changes: made a function in the engine read_scen that copies the part of make_scen that is used by derivatives and simplefun to provide exposure concentrations over time. Read_scen works with structure glo as input, rather than as global, which saves a lot of time. The same functionality is still included in make_scen for backwards compatibility. However, read_scen is now optimised for speed, and thus preferable!
+- Prepared BYOM for dealing with multiple discrete states (rather than just the alive-death dichotomy as used for survival data). This involves a new indicator in the data set (top left value) of -3, which is treated in a dedicated way in transfer (to calculate a likelihood function) and in the plotting routines.
+- Modified make_scen such that type=4 can deal with NaNs in the concentration column.
+- Added an option for the parameter-space explorer to skip profiling and additional sampling steps. For models that are more expensive to evaluate (e.g., DEBtox), this increases speed when we only need a (possibly rough) approximation of the parameter landscape. The best fit from this initial-sampling-only will generally be robust.
+- Display of goodness-of-fit as R-square, after optimisation, is improved (now a table, and NaN where there are no data, also when using multiple data sets).
+- Small modification to the parameter-space functions such that the 'rough' settings for the algorithm can be turned on or off with an option in opt_optim.
+- Added an error message at the data checks in prelim_checks: there should be no missing/removed animals at points where the observation on survival says NaN.
+- New function load_data_openguts that allows loading data sets from text files used for openGUTS. This is handy if you want a second opinion for an openGUTS analysis, or if you want to run an analysis that openGUTS does not implement.
+- Created new functions for calculations of ECx and EPx values: calc_ecx and calc_epx. These replace calc_conf_lc50, which has been discontinued. They extend the old function to sub-lethal endpoints as well. 
+- Changed the option opt_conf.set_zero to accept multiple parameters to set to zero. It is now a cell array rather than a string. However, it should still work if it is a single string (which is then turned into a cell where it is used). I have tried to make the zero-setting of parameters work consistently throughout (e.g., background hazard also has to be set to zero for calculation of ECx and EPx), but the code has become quite complex. Therefore, take care when setting extra parameters to zero, and check that it actually produces proper results.
+- Corrected small error in start_vals_guts that led to an error when there is less then 50% effect in the final treatment. This function is a bit shaky anyway, though it should get you in the ballpark.
+
+version 5.1 (30/08/2020)
+
+- Small change to plot_tktd to allow suppressing states from the plot (additional option field).
+- Small change in plot_tktd to also plot the exposure scenario in the plots for the internal concentration. This may need to be selectable with an option, but for now it is on all the time (code comment starts with 'TEST' so it can easily be modified or deleted if needed).
+- Another change in plot_tktd to add the option to flip the first and second row of the plot around. This is particularly useful when plotting both internal concentrations and damage. Damage is always plotted first, but when there is also a state of internal concentration, it makes sense to have it on top. Flipping is done AFTER plotting, so I hope this will work in all cases.
+- Added an option for plot_tktd (opt_tktd.plotexp). When set to 1, it plots the exposure profile as area in damage plots (and internal concentration plots), but when set to 0 suppresses it.
+- Another change in plot_tktd to report r-square when there are multiple states for length or reproduction. Also made sure that r-square is also calculated when some model predictions are NaN (this happens when the time vector of the model is shorter than that of the data, e.g., when there are outliers at the end of the data set).
+- Allowed the parameter-space explorer for up to 7 parameters, though a warning is shown for more than 4 fitted parameters. Using the explorer for more than 4 parameters is not recommended unless you REALLY know what you're doing.
+- Small change in auto_profiles: when a CI is a broken set, the best value was not printed on screen. This is repaired.
+- Small change in calc_parspace: when not making profiles, approximate CIs are estimated from the parameter cloud. However, in extreme cases this produced an error (when all sets in parameter space lead to a good fit). This error is now avoided, and NaN is given for the CIs. The parameter-space plot is produced, which will show the user that there is a specific problem.
+- Small change in plot_tktd to avoid an error message when there are no data for some states.
+- Small change in plot_tktd to accomodate a new format for setting fast/slow kinetics. This will be implemented in the GUTS/DEBtox package in future updates.
+- Small change in calc_optim: only FITTED parameters on log scale are specifically printed on screen. For non-fitted parameters, the log-scale setting is irrelevant anyway.
+
+changed in version 5.1a (8/9/2020, not released on the web)
+- Modified calc_parspace to NOT use a regular grid for the first round when fitting 6 or 7 parameters. Instead, a Latine-hypercube sample is used (if you don't have the statistics toolbox, a regular random sample is taken). This will be much faster, but may be less robust. This change is made to BLOCK 3.3. It is now also used for 5 parameters under the 'rough' setting: that will make a factor of 3 difference in calculation time in Round 1 of the optimisation.
+- In conjunction with the previous: for 6/7 parameters (and 5 with rough settings), parspace will not calculate the entire 95% joint CI, but an outer rim (the blue points) limited by the critical valued for df=5. This should be enough. This also prompted a small change in plot_grid to show this in the legend.
+
+changed in version 5.1b (9/9/2020, not released on the web)
+- Small change in calc_parspace to display only the fitted parameters in formatted manner when skipping profiles (exploratory run).
+- Small change in startgrid_debtox to accommodate an additional pMoA (hazard for repro).
+
+version 5.2 (24/09/2020)
+
+- Note: see also the changes made in the non-released sub-versions listed above.
+- Extended functionality of make_scen to allow for NaNs and double timepoints. This allows instant changes in concentration (as with block pulses). Especially when working with ODE solvers, this is much more efficient than having two time points close to each other (which would give very steep slopes of the exposure concentration). This is now the same functionality as in openGUTS. This require modifications in make_scen and read_scen. However, use only when the model evaluation in call_deri calculates the model piecewise (with glo.break_time)! This also requires modifications in call_deri and derivatives in the packages, so the tox-related packages will be updated as well.
+- Linked to the previous point: modified load_data_openguts to keep the double time points, rather than adding a tiny bit of time to the second point.
+- The pulse/renewal exposure (type 2 and 3) had a problem in their implementation when breaking the time vector in call_deri. The results can be trusted, but the calculations were unnecessarily slow. This is corrected with the implementation of the double time points (which made the issue apparent). However, this requires the update in call_deri (and therefore the packages) as well. So watch out for those updates.
+- Modified startgrid_debtox a bit to extend the search ranges for bb under costs for repro. This still needs more work ...
+- Modified make_scen to also allow exposure scenarios to be entered as cell arrays.
+- Small change in calc_epx such that it also accepts an exposure profile (two-column matrix without headers) as input for <fname_prof> and not just a filename. The input is checked for whether it is a character string or not, and used accordingly.
+
+version 6.0 BETA 1 not released through the web page! (02/07/2021)
+
+Note: there are a lot of changes in this version! A large number of 'smart' functions have been added to automate GUTS and DEBtox analyses. An important change to note in this version is a different setup of call_deri, moving structure glo from being global to an input. This is done to allow use of the parallel computing toolbox. This requires some changes for your older files to function properly! Take a look at call_deri in the examples directories. I made some changes to the BYOM engine folders; for your old analyses, copy the new pathdefine to that folder to avoid 'cannot find' errors for some functions.
+
+An extra engine has been added for parallel processing. I decided to make a separate engine, mainly for aesthetic reasons: using parallel for loops does not allow the use of nice progress bars and on-the-fly plotting of profile likelihoods. When you don't have the parallel toolbox, using the 'old' engine is preferable. Functionality is otherwise identical, apart from one small thing with the parameter-space explorer. When the final profiling is done in parallel, rather than sequentially, a profiling analysis does not know that a better optimum has already been found for a different parameter. So when profiling finds a better optimum, the output to screen is a bit confusing (the MLL does not always decrease with each message). The final output will be the same, though.
+
+Parallel processing is now used for:
+- Optimisation with the parameter-space explorer (calc_parspace and related functions).
+- Likelihood profiling in calc_proflik and calc_likregion.
+- Calculation of CIs on model curves, ECx and EPx (calc_conf, calc_ecx, calc_epx, etc.). It does not matter how the sample was generated (Bayes, likelihood-region, or parspace explorer).
+
+The parallel engine (engine_par) is selected calling: pathdefine(1). Using pathdefine(0) or pathdefine will give the regular engine. If you do not have the parallel toolbox installed, the regular engine will be used, whatever you call pathdefine with.
+
+- Plot_tktd gave an error when using multiple data sets per state, and when some sets are empty. I made a quick workaround in Line 697, but this may need a bit more attention (this part only affects the scaling of the y-axes in the plots).
+- Small change in transfer, around Line 388. Transfer returns INF for the overall minloglik when one of the data sets yields a NaN for minloglik. This is done even when the glo.wts for that data set is set to zero (summing something with a NaN yields a NaN). This is now changed: setting weights for a data set to zero ignores any NaN that may result from this data set.
+- The name of the diary is now a text string in a global: glo.diary. By default this is "results.out". The name of the diary can now be changed inside a byom_... script, which can be handy to keep results from different analyses separate.
+- Small change in startgrid_guts, allowing for a saturation parameter par.cK. This will be demonstrated at some point in an extra directory of the GUTS package.
+- Small change in calc_optim_ps: when slow kinetics is signals and the parspace algorithm restarts, opt_optim.ps_rough settings for the algorithm were ignored on the re-start (rough settings always used, regardless op the option). This is now corrected.
+- Added a new sub-folder in the engine 'utils'. This contains the utility functions that can be handy for specific cases of data loading, data manipulation, etc. This also involved changes to pathdefine, since this new folder needs to be added to the path as well. This is a bit annoying for your old packages. However, the utils folder a few handy functions that are just used in few packages. When in doubt, best to copy a new pathdefine function from the examples folder into your old folders. The new pathdefine adds all subdirectories of the engine folder to the path, so it is future-proof.
+- Added functions makerepro_ind and make_repro_grp to engine\utils to help translation of reproduction observations into the correct format for BYOM. These will be illustrated in packages in the near future.
+- Added functions automatic_runs_... to engine\utils. These scripts will be used for GUTS and DEBtox analyses, to help automatic data analysis. Their use will be demonstrated in the respective packages.
+- Small change to calc_ecx. In some cases, ECx will be well-defined, but its CI not. I now use a min-max range in opt_ecx.Cminmax. By default, this is set to [1e-7 1e6]. You can modify this in relation to the concentration range in the test.
+- Started the transition to remove globals from call_deri. The function transfer (as well as other files that use call_deri) now exports glo as input for call_deri. This offers a slight increase in speed, but also allows for a simpler transition to parallel processing with Matlab's parallel computing toolbox. Using old packages with the new engine will lead to errors. Either download a new version of the package, or slightly modify call_deri (take a look at the file in the example directory: change the function definition in the top of the file, remove the global, make sure that glo is input, and make sure that unused outputs are defined as empty matrices). Using new packages with the old engine (BYOM 5.2 and earlier) will also lead to errors. The best thing to do is to move to the new engine ASAP.
+- Linked to the previous point, the globals zvd (for zero-variate data) and pri (for Bayesian priors) are removed as globals. Within your scripts, you still define zvd and/or pri, but these are integrated by prelim_checks into glo and glo2 as glo.zvd and glo2.pri. 
+- Modifications to pathdefine.m. The rather cumbersome way to find the BYOM directory was changed to the more elegant method used for openGUTS. This function is now also prepared to be used with an alternative engine for parallel processing in the future (will require the parallel computing toolbox). The new version will remove any openGUTS/engine element from the path. This is handy for people that use both openGUTS and BYOM, so they don't have to clear the path when they switch. Similarly, openGUTS will remove the BYOM engine from the path.
+- Spotted an error in calc_ecx and calc_epx when using results from the Bayesian slice sampler. The 'limited' LCx and LPx calculations were fine. This error led to CIs that were too wide. Now corrected.
+- Made pathdefine.m smarter. It now uses the same strategy as used for openGUTS to locate the BYOM folder. It is also future-proofed to work with the parallel-computing toolbox of Matlab (which will be demonstrated in a future BYOM version).
+- The parspace explorer now also saves the <names> variable in the MAT file. This is handy when we want to use a saved sample in a somewhat different model. When plotting a saved sample in calc_optim_ps, the names from the saved set will be used (if <names> is indeed included in that MAT file).
+- Added an option opt_tktd.use_par_nofit. When set to 1, it will use non-fitted parameters from input par in plot_tktd for the best fit, but also for the CIs in calc_conf. Corresponding to this, plot_tktd sets opt_conf.use_par_out=1, so that it uses par_out, as entered in the function, rather than from saved set. This latter option is currently only set by plot_tktd.
+- Number of small changes to make it possible that to use a parspace sample in a slightly different model (i.e., with a different number of parameters).
+- Added a new option for calc_parspace. The opt_optim.ps_rough can now also be set to 2. This implies rough settings, but only for 4 rounds max of mutations (versus a default of 12). This is useful for quick exploration of many model options. The best fit is pretty robust, but the CIs not.
+- Added a new option for calc_parspace. With the option opt_optim.ps_slice=1, we can use slice-sampling MCMC steps instead of the main rounds of mutation. By default this is off. The MCMC algorithm is used in way that provides a good coverage of the interesting part of parameter space, rather than going for a 'random sample of the posterior'. This needs more checking, but it seems to provide better coverage of the sample in complex cases, and might work better for more free parameters. The parspace code works in the same way with the slice sampler, so you have the option for rough settings and skipping profiles if required.
+- Repaired an error in plot_tktd that led to weight factors being incorrect when not using all treatments in a data set.
+- Repaired an error in calc_local_sense that made the plot larger than the figure windows (for multi-panel plots).
+- Repaired an error in calc_epx that led to an error when there are already strong effects at a multiplication factor of 1.
+- More detailed initial checking on par, and more specific error warnings.
+- Added a new function calc_epx_robust. It turns out that there are (rare) circumstances under which EPx is not unique (Sherborne et al., in prep.). This can happen for DEBtox analyses, with effects on growth and feedbacks that include a size-dependent elimination. This new function simply runs through many multiplication factors, from small to large, in small steps so as not to miss the first (lowest) EPx. This is generally slower than the regular calc_epx.
+- Large changes to calc_proflik and calc_likregion. These functions can now use parallel processing, running multiple parameters (and the two branches for each profile) in parallel. The calc_likregion now calls calc_proflik for the profiling part. The auto_profiles is removed, since that functionality is now largely taken over by calc_proflik (profiling all fitted parameters, and re-fitting on finding a better optimum, can now be done with this function). The new calc_proflik is almost backwards compatible, but the options have changed and the (optional) outputs are re-ordered. Note that the profiling options are now only in opt_prof, even when they are used for profiling as part of calc_likregion. The profiling function no longer save a new optimum in 'profiles_neopt.out'. By default, they are set to break the analysis when a better optimum is found. You can also set opt_prof.re_fit=1 to automatically refit from the new optimum (and create profiles from there).
+- First versions of new functions calc_effect_window and calc_epx_window that use a moving time window across an exposure profile (for GUTS and DEBtox analyses). They calculate the effect level at the end of an exposure window, for fixed multiplication factors (calc_effect_window), or the explicit EPx for any specified x (calc_epx_window). The calc_epx_window calls calc_epx or calc_epx_robust for each window.
+
+version 6.0 BETA 2 not released through the web page! (15/07/2021)
+
+- Slight extension of pathdefine to produce a warning when multiple occurences of 'BYOM' are found on the path (last will be used). Furthermore, a check whether the BYOM folder is indeed named '\BYOM\'. Otherwise an error is produced.
+- Added in prelim_checks that DATA and W, of not defined, will be defined as empty. This allows prelim_checks to be used for simulations as well.
+- The utility scripts disp_settings_... now also print their output in the log file results.out.
+- Small changes in automatic_runs to return best value for the parameters in par_out when multiple configurations are run consecutively.
+- Modified sim_and_plot a bit to have a more transparent and flexible options structure. We cannot predefine it in prelim_checks, since that script is usually skipped for simulation. Also added the option to place the y-axis on log-scale (for type 3-4).
+- Added calculation of NRMSE (as in EFSA SO) to plot_tktd (only shown when making a predicted-observed plot).
+- Small changes to par_comp: this function compares the parameter structure in the input of a function to that from a saved set. It very often triggered a warning that they are different, while the difference is just in the range of the machine precision (e.g., caused by log transforming and back). It now states when the difference is negligible. Also, changed the warnings a bit, and does not trigger the worst warnings when one of the parameters is zero and the difference is tiny.
+- Extended the option opt_tktd.obspred: using 2 will produce 1 pred-obs plot for multiple data sets
+- Repaired a small error in calc_proflik that produced an error when a better optimum was found, and no re-fitting was done. Additionally, I also changes the options: re-fitting is now a setting of opt_prof.brkprof (namely 2). This is clearer since breaking the analysis while asking for re-fitting makes no sense.
+- Corrected an error in plot_tktd, which produced an error when plotting predictions when there are multiple data sets (which should not affect plotting without data).
+- Added an option to plot_tktd to also calculate SPPE according to the EFSA SO. For sub-lethal endpoints, this metric cannot be used as is, but an analogue is calculated: the relative error percentage at the end of the test, for each treatment.
+- Added some more explanation to the output of plot_tktd for the goodness-of-fit measures.
+- Added extra example files for a simple logistic growth model.
+
+version 6.0 BETA 3 not released through the web page! (30/07/2021)
+
+- Small change in calc_proflik: if someone enters {'all'} instead of 'all', that produced an error. Now it interprets it as the same thing: use all fitted parameters.
+- Small change to all automatic_runs_... functions: now allow an extra input of opt_prof. If this option structure is entered in the call as well, it will automatically produce profile likelihoods for the control fits, and the control fits only (for the tox parameters, calc_proflik can always be called afterwards, but this does not work for the controls).
+- A few changes to the helper function select_pred.m. This function can now immediately define the loaded exposure scenarios (no need to call make_scen again), and glo.t. Furthermore, the outputs are placed in a more practical order.
+- Small change to plot_tktd, to automatically set the option for 'prediction only' to 'on' when there are no data in the global DATA to plot. That saves us having to think about this option in most common cases. 
+- Repaired an error in plot_tktd for the SPPE calculation. It produced an error when there are mutiple data sets, and some states for which there are no data. This now shows NaN.
+- Small change in mat_combine: the output matrix is now only sorted based on the concentration row, rather than to the concentration row first and the next rows if there is a draw. This makes it easer to also combine weights matrices for the same data, if needed.
+- Added an option to plot_tktd to change the plot marker size, and an option to plot a coloured bar at a certain position (e.g., to show where hatching occurs in a data set for eggs/juveniles).
+- Added a helper function to load various data files for simultaneous analysis. This is used in a special DEBtox2019 package that is not included in the BYOM downloads just yet.
+- Plotting the exposure scenario with plot_tktd produced an error when there is no damage state specified (since the exposure profile is not determined in that case, at this moment). To avoid an error, no exposure profile will be plotted. However, I will look into this in the future.
+
+For Tjalling only (not included for distribution due to potential copyright issues since I modified the Matlab function slicesample):
+- Added the option to use slice sampling for the parameter-space explorer, rather than random mutations. This is experimental at the moment!
+- In relation to the previous item, added a modified slice-sampler function to the BYOM engine. This will also allow use of extended slice options for calc_slice (it can return the MLL as well). 
+
+version 6.0 BETA 4 not released through the web page! (19/08/2021)
+
+- In calc_effect_window, the parallel pool is started explicitly only when CIs are calculated. However, I also use the parallel toolbox when calculating effects without CIs (to run through MFs in parallel). If the parallel pool was not already active, this would lead to it being activated with the maximum amount of workers, rather than an 'optimal' value. This is now corrected.
+- Added a function calc_effect_window_batch that runs through multiple exposure profiles with calc_effect_window. The profiles may be located in a different folder than the working directory.
+- In calc_effect_window, calc_epx_window and calc_epx, when the filename is an entire path, only display on screen the filename and lowest folder. 
+- Modified select_pred to accept selecting an exposure profile in a different directory, and to provide an error when a MAT file is selected from a different directory. At this moment, the MAT file to use must be in the present active working directory.
+- Added the option to prune exposure profile windows: removing the windows that cannot yield the largest effect (or lowest EPx). A warning is provided for the cases where this shortcut is not advisable (Sherborne et al, in prep.).
+- A warning is shown for the cases where a non-robust EPx or effect window calculation is done, and where it is not guaranteed to report the lowest EPx or the worst effect level (Sherborne et al, in prep.).
+- Small change to startgrid_debtox, to make the code a bit more efficient, and to allow for two additional parameters (so far only used in a test package for effects on eggs in the brood pouch).
+- Slight changes to patdefine. It now produces an error when used with very old Matlab versions (before 2014b) and warnings when using old versions (before 2016b). An adaptation is made to attempt to make BYOM work for versions 2014b to 2016a (a workaround for <contains>). However, it is likely that other parts of the code will run into errors.
+
+==========================================================
+Errors spotted and things that will be changed/added in a next release:
+
+Longer-term developments:
+- Attempt to (largely) remove, or in any case structure, the globals from the code. Removing globals would allow use of parallel for loops (with the parallel-computing toolbox) and creation of executables (with the compiler toolbox). Furthermore, it would make debugging easier.
